@@ -1,5 +1,7 @@
 import axios from "axios";
 import { Message } from 'element-ui';
+import { gettoken,getusername} from "./app.js"
+import cookie from "cookie_js";
 
 const BASEURL = process.env.NODE_ENV === 'production' ? '' : '/api';
 
@@ -12,8 +14,8 @@ const service = axios.create({
 service.interceptors.request.use(function (config) {
 	
     // 在发送请求之前做些什么
-	config.headers['token']='zhaohailei'
-	config.headers['appid']='goodgood123'
+	config.headers['Tokey']=gettoken()
+	config.headers['UserName']=getusername()
     return config;
   }, function (error) {
     // 对请求错误做些什么
@@ -24,7 +26,6 @@ service.interceptors.request.use(function (config) {
 service.interceptors.response.use(function (response) {
     // 对响应数据做点什么
 	let data=response.data
-	console.log(response)
 	if(data.resCode!==0){
 		Message.error(data.message)
 		return Promise.reject(data)

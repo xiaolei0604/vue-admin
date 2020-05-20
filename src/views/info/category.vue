@@ -3,34 +3,34 @@
 		<div class="category">
 			<el-row>
 				<div class="addCategory">
-									  <el-button type="danger">添加分类</el-button>
+									  <el-button type="danger" @click="show_category_input">添加一级分类</el-button>
 				</div>
 				<hr />
-			  <el-col :span="12">
+			  <el-col :span="12" >
 				  
-				  <div class="categoryList">
+				  <div class="categoryList" >
 					  <ul>
-						  <li><svg-icon icon-class="jia" />&nbsp;&nbsp;新闻中心<div class="catBtn"> <el-button size="mini" type="success">添加子分类</el-button> <el-button size="mini" type="primary">编辑</el-button> <el-button size="mini" type="danger">删除</el-button></div></li>
-						  <li>— —我们的新闻<div class="catBtn"> <el-button size="mini" type="success">添加子分类</el-button> <el-button size="mini" type="primary">编辑</el-button> <el-button size="mini" type="danger">删除</el-button></div></li>
-						  <li>— —国家新闻<div class="catBtn"> <el-button size="mini" type="success">添加子分类</el-button> <el-button size="mini" type="primary">编辑</el-button> <el-button size="mini" type="danger">删除</el-button></div></li>
-						  <li>— —世界新闻</li>
-						  <li>— —韩国新闻</li>
+						  <li v-for="item in categoryResult":key="item.id">
+							  <svg-icon icon-class="jia" />&nbsp;&nbsp;{{item.category_name}}<div class="catBtn"> <el-button size="mini" type="success">添加子分类</el-button> <el-button size="mini" type="primary">编辑</el-button> <el-button size="mini" type="danger">删除</el-button></div>
+							  </li>
+						  <li>— —二级分类<div class="catBtn"> <el-button size="mini" type="success">添加子分类</el-button> <el-button size="mini" type="primary">编辑</el-button> <el-button size="mini" type="danger">删除</el-button></div></li>
+						
+						 
 					  </ul>
 				  </div>
 			  </el-col>
 			  <el-col :span="12">
 				   <p class="exitCatP">编辑分类</p>
 				  <div class="categoryEdit">
-					 
-					<el-form :label-position="labelPosition" label-width="80px" :model="formLabelAlign">
-					  <el-form-item label="一级分类">
-					    <el-input v-model="formLabelAlign.name"></el-input>
+					<el-form label-width="80px" :model="formAddCategory" ref="formAddCategory">
+					  <el-form-item label="一级分类" v-if="show_first" prop="category_first">
+					    <el-input v-model="formAddCategory.category_first"></el-input>
 					  </el-form-item>
-					  <el-form-item label="二级分类">
-					    <el-input v-model="formLabelAlign.region"></el-input>
+					  <el-form-item label="二级分类" v-if="show_second" prop="category_second">
+					    <el-input v-model="formAddCategory.category_second"></el-input>
 					  </el-form-item>
 					</el-form>
-					<el-button size="midum" type="danger">确定</el-button>
+					<el-button size="midum" type="danger" @click="add_category_fisrt">确定</el-button>
 				  </div>
 			  </el-col>
 			</el-row>
@@ -39,18 +39,72 @@
 </template>
 
 <script>
-	import {reactive} from "@vue/composition-api";
+	import {reactive,ref,onMounted} from "@vue/composition-api";
+	import {addFirstCategory,getCategoryAll} from "@/api/news.js"
 	export default{
 		name:"category",
-		setup(props,context){
-			const formLabelAlign=reactive(
+		setup(props,{root,refs}){
+			
+			const formAddCategory=reactive(
 			{
-			  name: '',
-			  region: '',
+			  category_first: '',
+			  category_second: '',
 			 
 			})
+			const show_first = ref(true)
+			const show_second = ref(true)
+			const categoryResult = reactive([
+				{
+					id:1,
+					category_name:'测试分类'
+				},
+				{
+					id:2,
+					category_name:'测试分类1'
+				},
+				{
+					id:3,
+					category_name:'测试分类2'
+					
+				}
+			])
+			const add_category_fisrt =(()=>{
+				
+				addFirstCategory({categoryName:formAddCategory.category_first}).then(response=>{
+					let data=response.data
+					if(data.resCode==0){
+						root.$message.success(data.message)
+						refs['formAddCategory'].resetFields()
+					}else{
+						root.$message.success("添加失败")
+					}
+				}).catch(error=>{
+					//如果返回值resCode不等于0的话拦截器直接拦截了
+					//root.$message.success(error)
+				})
+			})
+			const show_category_input=(()=>{
+				show_second.value=false
+			})
+			const getCategoryList =(()=>{
+				getCategoryAll().then(response=>{
+					let categoryResult=response.data.data
+					console.log(categoryResult)
+				}).catch(error=>{
+					root.$message.error("获取列表失败")
+				})
+			})
+			//生命周期函数加载完成执行此函数
+			onMounted(()=>{
+				getCategoryList()
+			})
 			return {
-				formLabelAlign
+				//变量ref
+				show_first,show_second,
+				//方法
+				add_category_fisrt,show_category_input,
+				//数组reative
+				formAddCategory,categoryResult
 			}
 		}
 	}
