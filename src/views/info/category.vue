@@ -135,7 +135,7 @@
 				updateId.value = valid
 				updateCategoryName.value = valname
 				formAddCategory.category_first = valname
-				btnFont.value="更新"
+				btnFont.value="更新" 
 				/* editCategory({id:valid,categoryName:formAddCategory.category_first}).then(response=>{
 					console.log(response)
 				}).catch(error=>{
