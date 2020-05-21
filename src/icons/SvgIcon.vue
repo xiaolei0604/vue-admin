@@ -18,7 +18,7 @@
 			}
 		},
 		setup(props,context){
-			console.log(props)
+			//console.log(props)
 			const msg=ref("手把手撸马前端大牛逼")
 			const iconname = computed(() =>{
 				if(props.iconClass){
