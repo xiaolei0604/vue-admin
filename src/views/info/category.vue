@@ -11,15 +11,12 @@
 				  <div class="categoryList" >
 					  <ul>
 						  <li v-for="item in categoryResult.item":key="item.id">
-							  <svg-icon icon-class="jia" />&nbsp;&nbsp;{{item.category_name}}<div class="catBtnFirst"> <el-button size="mini" type="success">添加子分类</el-button> <el-button size="mini" type="primary" @click="editFirstCategory(item.id,item.category_name)">编辑</el-button> <el-button size="mini" type="danger" @click="delFirstCategory(item.id)">删除</el-button></div>
+							  <svg-icon icon-class="jia" />&nbsp;&nbsp;{{item.category_name}}<div class="catBtnFirst"> <el-button size="mini" type="success" @click="addSecond(item.id,item.category_name)">添加子分类</el-button> <el-button size="mini" type="primary" @click="editFirstCategory(item.id,item.category_name)">编辑</el-button> <el-button size="mini" type="danger" @click="delFirstCategory(item.id)">删除</el-button></div>
 							  
 							  <ul class="secHover" v-if="item.children">
-								 <li v-for="itemChild in item.children" :key="itemChild.id">— —{{itemChild.category_name}}<div class="catBtnSecond"><el-button size="mini" type="primary">编辑</el-button> <el-button size="mini" type="danger">删除</el-button></div></li>  
+								 <li v-for="itemChild in item.children" :key="itemChild.id">— —{{itemChild.category_name}}<div class="catBtnSecond"><el-button size="mini" type="primary" @click="editFirstCategory(item.id,item.category_name)">编辑</el-button> </el-button> <el-button size="mini" type="danger" @click="delFirstCategory(itemChild.id)">删除</el-button></div></li>
 							  </ul>
 						  </li>
-						 
-						
-						 
 					  </ul>
 				  </div>
 			  </el-col>
@@ -27,14 +24,15 @@
 				   <p class="exitCatP">编辑分类</p>
 				  <div class="categoryEdit">
 					<el-form label-width="80px" :model="formAddCategory" ref="formAddCategory">
-					  <el-form-item label="一级分类" v-if="show_first" prop="category_first">
-					    <el-input v-model="formAddCategory.category_first"></el-input>
+					  <el-form-item label="一级分类"  v-if="show_first" prop="category_first">
+					    <el-input v-model="formAddCategory.category_first" :disabled="firstInputState"></el-input>
 					  </el-form-item>
 					  <el-form-item label="二级分类" v-if="show_second" prop="category_second">
 					    <el-input v-model="formAddCategory.category_second"></el-input>
 					  </el-form-item>
 					</el-form>
-					<el-button size="midum" type="danger" @click="add_category_fisrt(updateId)">{{btnFont}}</el-button>
+					<el-button size="midum" v-if="oneState" type="danger" @click="add_category_fisrt(updateId)">{{btnFont}}</el-button>
+					<el-button size="midum" v-if="twoState" type="danger" @click="add_category_second(updateId)">添加二级</el-button>
 				  </div>
 			  </el-col>
 			</el-row>
@@ -44,7 +42,7 @@
 
 <script>
 	import {reactive,ref,onMounted} from "@vue/composition-api";
-	import {addFirstCategory,getCategoryAll,deleteCategory,editCategory} from "@/api/news.js";
+	import {addFirstCategory,getCategoryAll,deleteCategory,editCategory,addChildrenCategory} from "@/api/news.js";
 	import { globalconfirm } from "@/until/global_V3.0.js"
 	export default{
 		name:"category",
@@ -59,8 +57,13 @@
 			const show_first = ref(true)
 			const show_second = ref(true)
 			const btnFont=ref("添加")
+			//定义一级文本可用状态
+			const firstInputState = ref(false)
 			//定义更新按钮的值
 			const updateId=ref('')
+			//定义天机一级和二级按钮的显示
+			const oneState=ref(true)
+			const twoState=ref(false)
 			const updateCategoryName=ref('')
 			const categoryResult = reactive({
 				item:[]
@@ -90,13 +93,41 @@
 							refs['formAddCategory'].resetFields()
 							getCategoryList()
 							btnFont.value="添加"
+							updateId.value = ''
+							updateCategoryName.value = ''
+							show_second.value=true
 						}).catch(error=>{
 							console.log(error)
 						})
 					}
-				
+			})
+			//添加二级分类先给右面编辑框赋值
+			const addSecond=((valid,valname)=>{
+				updateId.value = valid
+				formAddCategory.category_first=valname
+				firstInputState.value = true
+				oneState.value = false
+				twoState.value = true
 				
 			})
+			//添加二级分类
+			const add_category_second=((val)=>{
+				let data = {
+					categoryName:formAddCategory.category_second,
+					parentId:val
+				}
+				addChildrenCategory(data).then(response=>{
+					show_first.value = true
+					refs['formAddCategory'].resetFields()
+					oneState.value = true
+					twoState.value = false
+					firstInputState.value = false
+					root.$message.success(response.data.message)
+				}).catch(error=>{
+					console.log(error)
+				})
+			})
+			//一级二级分类编辑框状态
 			const show_category_input=(()=>{
 				show_second.value=false
 			})
@@ -136,21 +167,18 @@
 				updateCategoryName.value = valname
 				formAddCategory.category_first = valname
 				btnFont.value="更新" 
-				/* editCategory({id:valid,categoryName:formAddCategory.category_first}).then(response=>{
-					console.log(response)
-				}).catch(error=>{
-					console.log(error)
-				}) */
+				show_second.value=false
 			})
+			
 			//生命周期函数加载完成执行此函数
 			onMounted(()=>{
 				getCategoryList()
 			})
 			return {
 				//变量ref
-				show_first,show_second,updateId,updateCategoryName,btnFont,
+				show_first,show_second,updateId,updateCategoryName,btnFont,oneState,twoState,firstInputState,
 				//方法
-				add_category_fisrt,show_category_input,delFirstCategory,editFirstCategory,
+				add_category_fisrt,show_category_input,delFirstCategory,editFirstCategory,addSecond,add_category_second,
 				//数组reative
 				formAddCategory,categoryResult
 			}

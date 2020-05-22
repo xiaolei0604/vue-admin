@@ -53,7 +53,7 @@
 		  </el-row>
 		</el-form>
 		<el-table
-		    :data="tableData"
+		    :data="tableData.item"
 			style="width: 100%"
 			>
 			<el-table-column 
@@ -66,12 +66,12 @@
 		      >
 		    </el-table-column>
 			<el-table-column
-			  prop="category"
+			  prop="categoryId"
 			  label="类型"
 			  width="180">
 			</el-table-column>
 		    <el-table-column
-		      prop="date"
+		      prop="createDate"
 		      label="日期"
 		      width="180">
 		    </el-table-column>
@@ -116,7 +116,7 @@
 				
 			</el-col>
 		  </el-row>
-		  <Dialoginfolist :flag.sync="dialog_info" @close="close"/>
+		  <Dialoginfolist :flag.sync="dialog_info" @close="close" @addNewsSon="addNews"/>
 	</div>
 </template>
 
@@ -124,6 +124,7 @@
 	import Dialoginfolist from "./dialog/dialog_info"
 	import {reactive,ref,isref,toRefs,onMounted,watch} from "@vue/composition-api";
 	import { globalconfirm } from "../../until/global_V3.0.js"
+	import { getList,add} from "../../api/news.js"
 	export default{
 		name:"infoindex",
 		//2.0引入弹框组件
@@ -152,22 +153,11 @@
 				}
 			])
 			const formInline=reactive( {  })
-			const tableData=reactive([{
-					  category:'测试类型',
-			          date: '2016-05-03',
-			          user: '王小虎',
-			          title: '上海市普陀区金沙江路 1518 弄'
-			        }, {
-			          category:'测试类型',
-			          date: '2016-05-03',
-			          user: '王小虎',
-			          title: '上海市普陀区金沙江路 1518 弄'
-			        }, {
-			          category:'测试类型',
-			          date: '2016-05-03',
-			          user: '王小虎',
-			          title: '上海市普陀区金沙江路 1518 弄'
-			        }])
+			//获取信息列表
+			
+			const tableData=reactive({
+				item:[]
+			})
 			const dialog_info=ref(false)
 			const value=ref('')
 			const value1=ref('')
@@ -228,6 +218,32 @@
 			const deleteAlltrue=((value)=>{
 				console.log(value)
 			})
+			
+			const addNews = ((val)=>{
+				add(val).then(response=>{
+					let data = response
+					root.$message.success("添加成功")
+					
+				}).catch(()=>{
+					console.log(error)
+				})
+			})
+			//获取信息列表参数
+			let listData = {
+				categoryId: '',
+				startTiem: '',
+				endTime: '',
+				title: '',
+				id: '',
+				pageNumber: 1,
+				pageSize: 10
+			}
+			onMounted(()=>{
+				getList(listData).then(response=>{
+					tableData.item=response.data.data.data
+					console.log(tableData.item)
+				})
+			})
 			return{
 				currentPage4,
 				handleCurrentChange,
@@ -243,7 +259,8 @@
 				dialog_info,
 				close,
 				deleteItem,
-				deleteAll
+				deleteAll,
+				addNews
 			}
 		}
 	}

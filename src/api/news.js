@@ -31,4 +31,29 @@ export function editCategory(data){
 		data
 	})
 }
-	
+//添加子分类
+export function addChildrenCategory(data){
+	return service.request({
+		method:'post',
+		url:'/news/addChildrenCategory/',
+		data
+	})
+}
+//获取信息列表
+
+export function getList(data){
+	return service.request({
+		method:'post',
+		url:'/news/getList/',
+		data
+	})
+}
+
+//添加新闻	
+export function add(data){
+	return service.request({
+		method:'post',
+		url:'/news/add/',
+		data
+	})
+}
