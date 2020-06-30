@@ -11,8 +11,9 @@
 				  <span>{{item.meta.name}}</span>
 				</template>
 				
-				<el-menu-item v-for="(subitem,index) in item.children":key="subitem.id":index="subitem.path">{{subitem.meta.name}}</el-menu-item>
-				
+				<template v-for="(subitem,index) in item.children">
+				<el-menu-item v-if="!subitem.hidden" :key="subitem.id":index="subitem.path">{{subitem.meta.name}}</el-menu-item>
+				</template>
 			 </el-submenu>
 			
 			 </template>

@@ -57,3 +57,21 @@ export function add(data){
 		data
 	})
 }
+
+//删除新闻
+export function delNews(data){
+	return service.request({
+		method:'post',
+		url:'/news/deleteInfo/',
+		data
+	})
+}
+
+//修改新闻
+export function editInfo(data){
+	return service.request({
+		method:'post',
+		url:'/news/editInfo/',
+		data
+	})
+}

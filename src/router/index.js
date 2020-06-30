@@ -63,9 +63,37 @@ const routes = [
 				name:"新闻分类"
 			},
 			component: () =>import( "../views/info/category.vue")
+		},
+		{
+			path: "/infodetail",
+			name: "infodetail",
+			hidden:true,
+			meta:{
+				name:"新闻详情"
+			},
+			component: () =>import( "../views/info/infodetail.vue")
 		}
 		
 	],
+  },
+  {
+    path: "/user",
+    name: "user",
+  	meta:{
+  		name:"用户管理",
+  		icon:"user"
+  	},
+    component: () =>import( "../views/layout/index.vue"),
+  	children:[
+  		{
+  			path: "/userlist",
+  			name: "userlist",
+  			meta:{
+  				name:"用户列表"
+  			},
+  			component: () =>import( "../views/user/index.vue")
+  		}
+  	],
   }
 ];
 

@@ -69,7 +69,7 @@ module.exports = {
     proxy: null, // 设置代理
 	proxy: {
 	            '/api': {
-	                target: 'http://www.web-jshtml.cn/productapi/token', //API服务器的地址
+	                target: 'http://www.web-jshtml.cn/vue_admin_api/token', //API服务器的地址
 					//target: 'http://ceshi.tsdengfeng.com/productapi',
 	                changeOrigin: true, // 虚拟的站点需要更管origin
 	                pathRewrite: {   //重写路径 比如'/devApi/aaa/ccc'重写为'/aaa/ccc'

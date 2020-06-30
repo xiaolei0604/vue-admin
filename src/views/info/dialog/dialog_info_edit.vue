@@ -1,6 +1,6 @@
 <template>
 	<div>
-		<el-dialog title="新增" :visible.sync="dialogTableVisible" @close="close">
+		<el-dialog title="修改" :visible.sync="dialogTableVisible" @close="close">
 			<el-form :model="addNewsForm":ref="addNewsForm">
 				 <el-form-item label="标题" :label-width="formLabelWidth" props="name">
 				   <el-input v-model="addNewsForm.name" autocomplete="off"></el-input>
@@ -18,7 +18,7 @@
 			</el-form>
 			 <div slot="footer" class="dialog-footer">
 			    <el-button @click="dialogTableVisible = false">取 消</el-button>
-			    <el-button type="primary" @click="addNews">确 定</el-button>
+			    <el-button type="primary" @click="updateNews">确 定</el-button>
 			  </div>
 		</el-dialog>
 	</div>
@@ -26,7 +26,7 @@
 
 <script>
 	import {reactive,ref,isref,toRefs,onMounted,} from "@vue/composition-api";
-	import {getCategoryAll} from "@/api/news.js";
+	import {getCategoryAll,getList} from "@/api/news.js";
 	export default{
 		props:{
 			flag:{
@@ -45,6 +45,7 @@
 				}
 			}
 		},
+		
 		setup(props,{emit,root,refs}){			
 			 const dialogTableVisible=ref(false)
 			 const cateList = reactive({
@@ -66,21 +67,40 @@
 			 })
 			 //提交添加信息回调
 			 
-			 const addNews = (()=>{
+			 const updateNews = (()=>{
 				 let newsInfo = {
+					 id:listData.id,
 					 categoryId:addNewsForm.region,
 					 title: addNewsForm.name,
 					 content:addNewsForm.remark,
-					 createDate: "2020-02-02 12:00:00",
-					 imgUrl: "http://********"
+					 updateDate: "2020-02-02 12:00:00",
+					 imgUrl: "http://12.jpg",
+					 
 				 }
-				 emit('addNewsSon',newsInfo)
-				 //refs['addNewsForm'].resetFields()
-				 dialogTableVisible.value=false
+				  emit('updateNewsSon',newsInfo)
+				 //console.log(props.oneNews)
 				 
 			 })
-			 const open=(()=>{
+			 let listData = {
+			 	categoryId: '',
+			 	startTiem: '',
+			 	endTime: '',
+			 	title: '',
+			 	id: '',
+			 	pageNumber: 1,
+			 	pageSize: 5
+			 }
+			 const open=((val)=>{
 				 cateList.item=props.categoryList
+				 listData.id = val;
+				 getList(listData).then(response=>{
+				 	let oneNews=response.data.data.data[0]
+					addNewsForm.name=oneNews.title;
+					addNewsForm.region=oneNews.categoryId;
+					addNewsForm.remark=oneNews.content;
+				 }).catch(error=>{
+					 console.log("数据列表获取失败。")
+				 })
 			 })
 			 return{
 				 open,
@@ -89,7 +109,7 @@
 				 formLabelWidth,
 				 dialogTableVisible,
 				 close,
-				 addNews,
+				 updateNews,
 			 }
 		}
 		

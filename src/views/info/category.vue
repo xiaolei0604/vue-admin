@@ -14,7 +14,7 @@
 							  <svg-icon icon-class="jia" />&nbsp;&nbsp;{{item.category_name}}<div class="catBtnFirst"> <el-button size="mini" type="success" @click="addSecond(item.id,item.category_name)">添加子分类</el-button> <el-button size="mini" type="primary" @click="editFirstCategory(item.id,item.category_name)">编辑</el-button> <el-button size="mini" type="danger" @click="delFirstCategory(item.id)">删除</el-button></div>
 							  
 							  <ul class="secHover" v-if="item.children">
-								 <li v-for="itemChild in item.children" :key="itemChild.id">— —{{itemChild.category_name}}<div class="catBtnSecond"><el-button size="mini" type="primary" @click="editFirstCategory(item.id,item.category_name)">编辑</el-button> </el-button> <el-button size="mini" type="danger" @click="delFirstCategory(itemChild.id)">删除</el-button></div></li>
+								 <li v-for="itemChild in item.children" :key="itemChild.id">— —{{itemChild.category_name}}<div class="catBtnSecond"><el-button size="mini" type="primary" @click="editSecondCategory(itemChild.id,itemChild.category_name)">编辑</el-button> </el-button> <el-button size="mini" type="danger" @click="delFirstCategory(itemChild.id)">删除</el-button></div></li>
 							  </ul>
 						  </li>
 					  </ul>
@@ -33,6 +33,7 @@
 					</el-form>
 					<el-button size="midum" v-if="oneState" type="danger" @click="add_category_fisrt(updateId)">{{btnFont}}</el-button>
 					<el-button size="midum" v-if="twoState" type="danger" @click="add_category_second(updateId)">添加二级</el-button>
+					<el-button size="midum" v-if="threeState" type="danger" @click="edit_category_second(updateId)">更新二级</el-button>
 				  </div>
 			  </el-col>
 			</el-row>
@@ -41,7 +42,7 @@
 </template>
 
 <script>
-	import {reactive,ref,onMounted} from "@vue/composition-api";
+	import {reactive,ref,onMounted,watch} from "@vue/composition-api";
 	import {addFirstCategory,getCategoryAll,deleteCategory,editCategory,addChildrenCategory} from "@/api/news.js";
 	import { globalconfirm } from "@/until/global_V3.0.js"
 	export default{
@@ -64,6 +65,7 @@
 			//定义天机一级和二级按钮的显示
 			const oneState=ref(true)
 			const twoState=ref(false)
+			const threeState= ref(false)
 			const updateCategoryName=ref('')
 			const categoryResult = reactive({
 				item:[]
@@ -169,6 +171,33 @@
 				btnFont.value="更新" 
 				show_second.value=false
 			})
+			//修改二级分类
+			const editSecondCategory = reactive((valid,valname)=>{
+				updateId.value = valid
+				updateCategoryName.value = valname
+				formAddCategory.category_second = valname
+				show_second.value=true
+				show_first.value=false
+				oneState.value=false
+				twoState.value=false
+				threeState.value=true
+			})
+			const edit_category_second = reactive((val)=>{
+				editCategory({id:val,categoryName:formAddCategory.category_second}).then(response=>{
+					let data=response.data
+					root.$message.success(data.message)
+					refs['formAddCategory'].resetFields()
+					getCategoryList()
+					btnFont.value="添加"
+					updateId.value = ''
+					updateCategoryName.value = ''
+					show_first.value=true
+					oneState.value=true
+					threeState.value=false
+				}).catch(error=>{
+					console.log(error)
+				})
+			})
 			
 			//生命周期函数加载完成执行此函数
 			onMounted(()=>{
@@ -176,9 +205,9 @@
 			})
 			return {
 				//变量ref
-				show_first,show_second,updateId,updateCategoryName,btnFont,oneState,twoState,firstInputState,
+				show_first,show_second,updateId,updateCategoryName,btnFont,oneState,twoState,firstInputState,threeState,
 				//方法
-				add_category_fisrt,show_category_input,delFirstCategory,editFirstCategory,addSecond,add_category_second,
+				add_category_fisrt,show_category_input,delFirstCategory,editFirstCategory,addSecond,add_category_second,editSecondCategory,edit_category_second,
 				//数组reative
 				formAddCategory,categoryResult
 			}

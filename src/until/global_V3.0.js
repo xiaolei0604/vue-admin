@@ -11,7 +11,7 @@ export function globalconfirm (){
 			str.value="修改弹框定义的值"
 			params.fn && params.fn(params.id)
 		}).catch(() => {
-		  MessageBox("已取消删除")
+		  console.log("已取消删除")
 			
 		});
 	})
