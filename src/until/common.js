@@ -7,7 +7,6 @@ export function globalGetCategory (){
 		item:[]
 	})
 	const globalGetCategoryAll=(()=>{
-		
 		getCategoryAll().then(response=>{
 			let cateDate=response.data.data
 			catList.item=cateDate
@@ -21,6 +20,7 @@ export function globalGetCategory (){
 		globalGetCategoryAll
 	}
 }
+//转换时间戳
 export function toDateChange(dataC){
 	let timestamp=dataC;
 	let date = new Date(timestamp * 1000);//时间戳为10位需*1000，时间戳为13位的话不需乘1000

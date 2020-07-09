@@ -84,9 +84,12 @@
 			  >
 		    </el-table-column>
 		    <el-table-column
-		      prop="user"
-		      label="管理员"
+		      prop=""
+		      label="缩略图"
 			  width="100">
+				<template slot-scope="scope">
+				              <img :src="scope.row.imgUrl" :alt="scope.row.title" width="50" height="50">
+				     </template>
 		    </el-table-column>
 			<el-table-column
 			 
@@ -94,9 +97,9 @@
 			  width="260">
 			   <template slot-scope="scope">
 				  <el-button size="mini" type="success" @click="diainfoedit(scope.row.id)">编辑</el-button>
-				  <router-link :to="{name: 'infodetail',query:{id:scope.row.id}}">
-				  <el-button size="mini" type="warning">编辑详情</el-button>
-				  </router-link>
+				  <!-- <router-link :to="{name: 'infodetail',query:{id:scope.row.id}}"> -->
+				  <el-button size="mini" type="warning" @click="infodetailJump(scope.row)">编辑详情</el-button>
+				 <!-- </router-link> -->
 				  <el-button size="mini" type="danger" @click="deleteItem(scope.row.id)">删除</el-button>
 				</template>
 			</el-table-column>
@@ -344,6 +347,18 @@
 				}
 
 			})
+			//路由跳转函数
+			const infodetailJump = reactive((val)=>{
+				root.$store.commit('infoDetail/SET_ID',val.id)
+				root.$store.commit('infoDetail/SET_TITLE',val.title)
+				root.$router.push({
+					name:"infodetail",
+					params:{
+						id:val.id,
+						title:val.title
+					}
+				})
+			})
 			return{
 				listData,
 				handleCurrentChange,
@@ -372,7 +387,9 @@
 				diainfoedit,
 				newsId,
 				//修改函数
-				updateNews
+				updateNews,
+				//路由跳转
+				infodetailJump
 			}
 		}
 	}
