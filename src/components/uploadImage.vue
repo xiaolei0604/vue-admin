@@ -69,7 +69,7 @@
 				 }
 				 uploadImgToken(qiniuToken).then(response=>{
 					 //接口返回TOken貌似不对，目前token写死
-					 form.uploadToken.token="i7BuE5iU4Mk3a1XxF2Kni-_35Ic1X0_32Bha3HDp:GBpJk_LT10BGDbv3oqafE58asIg=:eyJzY29wZSI6InZ1ZS1pbWctbGVpIiwiZGVhZGxpbmUiOjE1OTQxOTI4MDB9"
+					 form.uploadToken.token="i7BuE5iU4Mk3a1XxF2Kni-_35Ic1X0_32Bha3HDp:TJw9xcyhnwDLjf95H-ivuueXpQY=:eyJzY29wZSI6InZ1ZS1pbWctbGVpIiwiZGVhZGxpbmUiOjE1OTU0OTUxMDd9"
 				 }).catch(error=>{
 					 console.log(error)
 				 })

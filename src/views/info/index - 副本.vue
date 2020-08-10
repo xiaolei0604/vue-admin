@@ -54,18 +54,76 @@
 				</el-col>	
 		  </el-row>
 		</el-form>
-		<commonTable :tableDataConfig.sync="tableData" @deleteAll="deleteAll" @handleSizeChange="handleSizeChange" @handleCurrentChange="handleCurrentChange">
-			<template v-slot:newsImg="slotData">
-				 <img :src="slotData.data.imgUrl" :alt="slotData.data.title" width="50" height="50">
-			</template>
-			<template v-slot:newsBtn="slotData">
-				<el-button size="mini" type="success" @click="diainfoedit(slotData.data.id)">编辑</el-button>
-				 <!-- <router-link :to="{name: 'infodetail',query:{id:scope.row.id}}"> -->
-				 <el-button size="mini" type="warning" @click="infodetailJump(slotData.data)">编辑详情</el-button>
-				<!-- </router-link> -->
-				 <el-button size="mini" type="danger" @click="deleteItem(slotData.data.id)">删除</el-button>
-			</template>
-		</commonTable>
+		<el-table
+			ref="multipleTable"
+		    :data="tableData.item"
+			@selection-change="changeFun"
+			style="width: 100%"
+			>
+			<el-table-column 
+			 type="selection"
+			 prop='id'
+			width="40">
+			</el-table-column>
+		    <el-table-column
+		      prop="title"
+		      label="标题"
+		      >
+		    </el-table-column>
+			<el-table-column
+			  prop="categoryId"
+			  label="类型"
+			  width="180"
+			  :formatter="toCategoryName">
+			</el-table-column>
+		    <el-table-column
+		      prop="createDate"
+		      label="日期"
+		      width="180"
+			  :formatter="toDate"
+			  >
+		    </el-table-column>
+		    <el-table-column
+		      prop=""
+		      label="缩略图"
+			  width="100">
+				<template slot-scope="scope">
+				              <img :src="scope.row.imgUrl" :alt="scope.row.title" width="50" height="50">
+				     </template>
+		    </el-table-column>
+			<el-table-column
+			 
+			  label="操作"
+			  width="260">
+			   <template slot-scope="scope">
+				  <el-button size="mini" type="success" @click="diainfoedit(scope.row.id)">编辑</el-button>
+				  <!-- <router-link :to="{name: 'infodetail',query:{id:scope.row.id}}"> -->
+				  <el-button size="mini" type="warning" @click="infodetailJump(scope.row)">编辑详情</el-button>
+				 <!-- </router-link> -->
+				  <el-button size="mini" type="danger" @click="deleteItem(scope.row.id)">删除</el-button>
+				</template>
+			</el-table-column>
+		  </el-table>
+		  <el-row style="margin-top: 30px;">
+		    <el-col :span="12">
+				<el-button size="small" @click="deleteAll">批量删除</el-button>
+			</el-col>
+		    <el-col :span="12">
+				<div class="block" style="text-align: right;">
+				    <el-pagination
+						
+				      @size-change="handleSizeChange"
+				      @current-change="handleCurrentChange"
+				      :current-page="listData.pageNumber"
+				      :page-sizes="[5, 10, 15, 20]"
+				      :page-size="listData.pageSize"
+				      layout="total, sizes, prev, pager, next, jumper"
+				      :total="total">
+				    </el-pagination>
+				  </div>
+				
+			</el-col>
+		  </el-row>
 		  <Dialoginfolist :flag.sync="dialog_info" :categoryList="options.item" @close="close" @addNewsSon="addNews" ref="dialog"/>
 		  <Dialoginfoedit :flag.sync="dialog_info_edit" :categoryList="options.item" @close="close" @updateNewsSon="updateNews" ref="dialogedit"/>
 	</div>
@@ -78,11 +136,10 @@
 	import { globalconfirm } from "../../until/global_V3.0.js"
 	import { getList,add,delNews,editInfo} from "../../api/news.js"
 	import { globalGetCategory,toDateChange } from "../../until/common.js"
-	import commonTable from "../../components/commonTable.vue"
 	export default{
 		name:"infoindex",
 		//2.0引入弹框组件
-		components:{ Dialoginfolist,Dialoginfoedit,commonTable },
+		components:{ Dialoginfolist,Dialoginfoedit },
 		setup(props,{root,refs}){
 			const { str:aaa,confirm } = globalconfirm();
 			const {globalGetCategoryAll,catList} = globalGetCategory();
@@ -91,23 +148,6 @@
 			})
 			watch(()=>catList.item,(value)=>{
 				options.item=value
-			})
-			//公共表格配置参数（tbody和tableDatatotal 需要从接口更新值）
-			const tableData = reactive({
-				thead:[
-					{label:"标题",value:"title"},
-					{label:"类型",value:"categoryId"},
-					{label:"日期",value:"createDate",formater:"toDate"},
-					{label:"缩略图",value:"imgUrl",columType:"slot",slotName:"newsImg"},
-					{label:"编辑",columType:"slot",slotName:"newsBtn"}
-				],
-				//给公共表格组件传递数据源
-				tbody:[],
-				//是否显示全选择控件
-				selectState:true,
-				tableDatatotal:20,//数组总数
-				listPageSize:5,//每一页显示多少条数据
-				listPageNumber:1//从第几页开始显示
 			})
 			const searchKey = reactive([
 				{
@@ -140,25 +180,43 @@
 				title: '',
 				id: '',
 				pageNumber: 1,
-				pageSize: 5
+				pageSize: 10
 			}
 			
-			/* const tableData=reactive({
+			const tableData=reactive({
 				item:[],
 				multipleSelection: []
-			}) */
+			})
 			const dialog_info=ref(false)
 			const dialog_info_edit=ref(false)
 			const value=ref('')
 			const value1=ref('')
 			const searcheTitle=ref('')
 			const searchContent=ref('')
-			
+			const total=ref(25)
+			const muchId=ref('')
+			const handleSizeChange =((val)=>{
+				listData.pageSize = val
+				getListAll()
+			})
+			const handleCurrentChange =((val)=>{
+				listData.pageNumber = val
+				getListAll()
+			})
 			const close =(()=>{
 				dialog_info.value=false
 			})
 			//调用GLOBAL弹框方法
 			const deleteItem=((val)=>{
+				//2.0引入弹框使用方法
+				/* context.root.confirm({
+					content:'确定要删除此条数据吗？？',
+					tip:'删除提示',
+					fn:deleteAlltrue,
+					id:111111
+				}) */
+				//3.0引入弹框使用方法
+				
 				confirm(
 					{
 						content:'确定要删除此条数据吗？？',
@@ -174,14 +232,32 @@
 					tableData.item.splice(0,1)				}).catch(error=>{					console.log(error)				})
 				
 			})
+			//获取多选ID号码
+			const changeFun=((val)=>{
+				muchId.value='';
+				tableData.multipleSelection = val;
+				val.forEach(item =>{
+					muchId.value=item.id+','+muchId.value
+					
+				})
+				//截取最后一位的逗号
+				muchId.value = muchId.value.substr(0,muchId.value.length-1);
+			})
 			//调用GLOBAL弹框方法
-			const deleteAll=((val)=>{
+			const deleteAll=(()=>{
+				//2.0引入弹框使用方法
+				/* context.root.confirm({
+					content:'确定要删除选中数据吗，删除不可恢复！！',
+					btnType:'success',
+					fn:deleteAlltrue,
+					id:222222
+				}) */
 				confirm(
 					{
 						content:'确定要删除选中数据吗，删除不可恢复！！',
 						btnType:'success',
 						fn:deleteAlltrue,
-						id:val
+						id:muchId.value
 					}
 				);
 			})
@@ -189,11 +265,13 @@
 			const deleteAlltrue=((value)=>{
 				console.log(value)
 				let data={
-					id:value
+					id:[value]
 				}
 				delNews(data).then(response=>{
 					root.$message.success(response.data.message)
+					muchId.value=''
 				}).catch(error=>{
+					muchId.value=''
 					console.log(error)
 				})
 			})
@@ -234,30 +312,22 @@
 				}
 				console.log(listData)
 				getList(listData).then(response=>{
-					tableData.tbody=response.data.data.data
-					tableData.tableDatatotal=response.data.data.total
+					tableData.item=response.data.data.data
+					total.value=response.data.data.total
 				})
 				
-			})
-			const handleSizeChange =((val)=>{
-				listData.pageSize = val
-				getListAll()
-			})
-			const handleCurrentChange =((val)=>{
-				listData.pageNumber = val
-				getListAll()
 			})
 			//获取信息列表参数
 			onMounted(()=>{
 				getListAll()//获取所有的新闻
 				globalGetCategoryAll()//获取所有的分类
-				
 			})
 			//获取所有新闻列表
 			const getListAll =(()=>{
 				getList(listData).then(response=>{
-					tableData.tbody=response.data.data.data
-					tableData.tableDatatotal=response.data.data.total
+					tableData.item=response.data.data.data
+					total.value=response.data.data.total
+					//console.log(tableData.item)
 				})
 			})
 			//时间转换
@@ -279,7 +349,6 @@
 			})
 			//路由跳转函数
 			const infodetailJump = reactive((val)=>{
-				console.log(val)
 				root.$store.commit('infoDetail/SET_ID',val.id)
 				root.$store.commit('infoDetail/SET_TITLE',val.title)
 				root.$router.push({
@@ -292,6 +361,8 @@
 			})
 			return{
 				listData,
+				handleCurrentChange,
+				handleSizeChange,
 				tableData,
 				options,
 				value,
@@ -306,7 +377,9 @@
 				deleteAll,
 				addNews,
 				whereList,
+				total,
 				diafun,
+				changeFun,
 				toDate,
 				toCategoryName,
 				//修改弹框使用参数
@@ -316,9 +389,7 @@
 				//修改函数
 				updateNews,
 				//路由跳转
-				infodetailJump,
-				handleSizeChange,
-				handleCurrentChange,
+				infodetailJump
 			}
 		}
 	}
