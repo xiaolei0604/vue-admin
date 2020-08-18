@@ -1,6 +1,6 @@
 <template>
 	<div>
-			<el-select v-model="formUser.searchContent" placeholder="请选择" >
+			<el-select v-model="formUser.searchContent" placeholder="请选择"  @change="changeSelect">
 					<el-option
 					 v-for="itme in formUser.searcheTitle"
 					 :key="itme.valuekey"
@@ -20,6 +20,10 @@
 			selectList:{
 				type:Array,
 				default:[]
+			},
+			searchKey:{
+				type:String,
+				default:''
 			}
 		},
 		setup(props,{root,emit}){
@@ -33,9 +37,12 @@
 			watch(()=>props.selectList,(value)=>{
 				formUser.searcheTitle=value
 			})
+			const changeSelect =(()=>{
+				emit("update:searchKey",formUser.searchContent)
+			})
 			return{
 				//数组
-				formUser,
+				formUser,changeSelect
 				//变量
 			}
 		}

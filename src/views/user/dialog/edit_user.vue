@@ -1,6 +1,6 @@
 <template>
 	<div>
-		<el-dialog title="添加用户" :visible.sync="dialogFormVisible" @close="closeAdd" @open="getAllRole">
+		<el-dialog title="修改用户" :visible.sync="dialogFormVisible" @close="closeAdd" @open="getAllRole">
 		  <el-form :model="form" :rules="rules" ref="form">
 		    <el-form-item label="用户名" :label-width="formLabelWidth" prop="username">
 		      <el-input v-model="form.username" autocomplete="off"></el-input>
@@ -28,15 +28,15 @@
 			    </el-checkbox-group>
 			</el-form-item>
 			<el-form-item label="是否启用" :label-width="formLabelWidth" prop="status">
-			<el-radio-group v-model="form.status">
-			      <el-radio label="1">禁用</el-radio>
-			      <el-radio label="2">启用</el-radio>
+				<el-radio-group v-model="form.status">
+			      <el-radio :label="1">禁用</el-radio>
+			      <el-radio :label="2">启用</el-radio>
 			    </el-radio-group>
 			</el-form-item>
 		  </el-form>
 		  <div slot="footer" class="dialog-footer">
 		    <el-button @click="dialogFormVisible = false">取 消</el-button>
-		    <el-button type="primary" @click="addTrueUser">确 定</el-button>
+		    <el-button type="primary" @click="editTrueUser">确 定</el-button>
 		  </div>
 		</el-dialog>
 	</div>
@@ -45,7 +45,7 @@
 <script>
 	import sha1 from "js-sha1";
 	import {reactive,ref,watch,onMounted} from "@vue/composition-api";
-	import {getRole,addUser,getUser} from "../../../api/user.js"
+	import {getRole,editUser,getUser,getSystem} from "../../../api/user.js"
 	import commonCity from "../../../components/commonCity.vue"
 	import {validateEmail,validatePhone} from "@/until/validate";
 	export default{
@@ -87,6 +87,7 @@
 			const formLabelWidth = ref('80px')
 			const closeAdd =(()=>{
 				dialogFormVisible.value=false
+				resetForm()
 				emit("update:flag",false)
 			})
 			const oneRequest=ref()
@@ -94,28 +95,41 @@
 			const open=((val)=>{
 				form.id=val
 				getUser(form).then(resquest=>{
-					console.log(resquest)
+					let oneRequest=resquest.data.data.data.filter(data=>data.id == val)[0]
+					form.username=oneRequest.username
+					form.truename=oneRequest.truename
+					form.phone=oneRequest.phone
+					form.role=JSON.parse(oneRequest.role)
+					form.status=JSON.parse(oneRequest.status)
+					form.region=oneRequest.region
 				}).catch(error=>{
 					console.log(error)
 				})
 			})
-			/*执行添加用户函数*/
-			const addTrueUser=(()=>{
-				form.region='{"provinceValue":"'+provinceValue.value+'",'+'"cityValue":"'+cityValue.value+'"'+'",'+'"areaValue":"'+areaValue.value+'"'+'",'+'"streetValue":"'+streetValue.value+'"}'
-				form.password=sha1(form.password)
+			/*执行修改用户函数*/
+			const editTrueUser=(()=>{
+				if(provinceValue.value){
+					form.region='{"provinceValue":"'+provinceValue.value+'",'+'"cityValue":"'+cityValue.value+'"'+'",'+'"areaValue":"'+areaValue.value+'"'+'",'+'"streetValue":"'+streetValue.value+'"}'
+				}
+				if(form.password){
+					form.password=sha1(form.password)
+				}else{
+					root.$delete(form,'password')
+				}
 				refs['form'].validate((valid) => {
 				          if (valid) {
+							  
 							 if(validateEmail(form.username)){
 								 form.role=JSON.stringify(form.role)
-								 addUser(form).then(request=>{
+								 console.log(form)
+								editUser(form).then(request=>{
+									form.role=JSON.parse(form.role)
 								 	root.$message.success(request.data.message)
-									resetForm()
 									props.refreshGetUser()
-									dialogFormVisible.value=false
 								 }).catch(error=>{
 								 	form.role=JSON.parse(form.role)
 								 	console.log(error)
-								 }) 
+								 })
 								 
 							 }else{
 								root.$message.warning("请输入正确邮箱地址")
@@ -142,9 +156,6 @@
 				truename: [
 					{ required: true, message: '请输入真实姓名', trigger: 'blur' },
 				],
-				password: [
-					{ required: true, message: '请输入密码', trigger: 'blur' },
-				],
 				phone: [
 					{ required: true, trigger: 'blur',validator:checkPhone },
 				],
@@ -159,7 +170,7 @@
 			
 			/*获取角色*/
 			const getAllRole = (()=>{
-				getRole().then(request=>{
+				getSystem().then(request=>{
 					form.role1=request.data.data
 				}).catch(error=>{
 					console.log(error)
@@ -174,8 +185,8 @@
 				rules,
 				//地区返回
 				provinceValue,cityValue,areaValue,streetValue,
-				//添加用户
-				addTrueUser,getAllRole,
+				//修改用户
+				editTrueUser,getAllRole,
 				//表格返回参数
 				formLabelWidth,dialogFormVisible,form,closeAdd,open
 			}

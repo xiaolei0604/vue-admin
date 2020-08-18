@@ -45,7 +45,7 @@
 <script>
 	import sha1 from "js-sha1";
 	import {reactive,ref,watch,onMounted} from "@vue/composition-api";
-	import {getRole,addUser,getUser} from "../../../api/user.js"
+	import {getRole,addUser,getUser,getSystem} from "../../../api/user.js"
 	import commonCity from "../../../components/commonCity.vue"
 	import {validateEmail,validatePhone} from "@/until/validate";
 	export default{
@@ -150,7 +150,7 @@
 			
 			/*获取角色*/
 			const getAllRole = (()=>{
-				getRole().then(request=>{
+				getSystem().then(request=>{
 					form.role1=request.data.data
 				}).catch(error=>{
 					console.log(error)

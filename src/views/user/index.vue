@@ -5,7 +5,7 @@
 				
 				<el-col :span="6">
 					<el-form-item label="关键字:">
-						<commonSelect :selectList.sync="formUser.optionList"/>
+						<commonSelect :selectList.sync="formUser.optionList" :searchKey.sync="formUser.searchKey"/>
 					</el-form-item>
 				</el-col>
 				<el-col :span="5" class="pull-left-10">
@@ -19,7 +19,7 @@
 				</el-col>	
 		  </el-row>
 		</el-form>
-		<commonTable :tableDataConfig.sync="tableData" @deleteAll="deleteAllTip">
+		<commonTable :tableDataConfig.sync="tableData" @deleteAll="deleteAllTip" @handleSizeChange="handleSizeChange" @handleCurrentChange="handleCurrentChange">
 			<!-- 状态插槽 -->
 			<template v-slot:manaerState="slotData">
 				<el-switch
@@ -38,7 +38,7 @@
 			</template>
 		</commonTable>
 		<addUserDialog :flag.sync="dialogFormVisible" :refreshGetUser="getAllUser" ref="dialogUser"/>
-		<edituserDialog :flag.sync="dialogFormVisibleEdit" ref="dialogEditUser"/>
+		<edituserDialog :flag.sync="dialogFormVisibleEdit" ref="dialogEditUser" :refreshGetUser="getAllUser"/>
 	</div>
 </template>
 
@@ -82,9 +82,17 @@
 				truename:'',
 				phone:'',
 				pageNumber:1,
-				pageSize:10
+				pageSize:5
 			})
 			onMounted(()=>{
+				getAllUser()
+			})
+			const handleSizeChange =((val)=>{
+				userList.pageSize = val
+				getAllUser()
+			})
+			const handleCurrentChange =((val)=>{
+				userList.pageNumber = val
 				getAllUser()
 			})
 			const formUser = reactive({
@@ -92,16 +100,24 @@
 					{value:"phone",label:"手机号"},
 					{value:"name",label:"姓名"}
 				],
+				searchKey:'',
 				searchContent:"",
 			})
 			/*条件筛选*/
 			const search = (()=>{
-				
+				if(formUser.searchKey=="phone"){
+					userList.phone=formUser.searchContent
+				}
+				if(formUser.searchKey=="name"){
+					userList.username=formUser.searchContent
+				}
+				getAllUser()
 			})
 			//获取所有用户
 			const getAllUser = (()=>{
 				getUser(userList).then(request=>{
 					tableData.tbody=request.data.data.data
+					tableData.tableDatatotal=request.data.data.total
 				}).catch(error=>{
 					console.log(error)
 				})
@@ -157,7 +173,10 @@
 				/*直接调取子组件的open方法*/
 				refs.dialogUser.open()
 			})
+			
 			return{
+				//分页方法
+				handleSizeChange,handleCurrentChange,
 				//弹窗状态
 				dialogFormVisible,openDialog,dialogFormVisibleEdit,
 				//方法
