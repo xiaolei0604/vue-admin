@@ -1,6 +1,7 @@
 import { MessageBox } from 'element-ui';
 import {reactive,ref} from "@vue/composition-api";
 import {getCategoryAll} from "../api/news.js";
+import store from "../store/index.js"
 //公共方法调取新闻分类
 export function globalGetCategory (){
 	const catList=reactive({
@@ -31,4 +32,18 @@ export function toDateChange(dataC){
 	let m = date.getMinutes() + ':';
 	let s = date.getSeconds();
 	return Y + M + D + h + m + s;
+}
+
+export function getBtnRole(data){
+	let btnRoleAdmin = store.getters["dynamicRoutes/btnRole"].role
+	if(btnRoleAdmin.includes('admin')){
+		return true;
+	}else{
+		let btnRole = store.getters["dynamicRoutes/btnRole"].btnPerm
+		if(btnRole.includes(data)){
+			return true
+		}else{
+			return false
+		}
+	}
 }

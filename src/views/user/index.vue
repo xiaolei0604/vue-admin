@@ -15,7 +15,7 @@
 						<el-button type="danger" @click="search">提交</el-button>
 				</el-col>
 				<el-col :span="1" style="float: right; margin-right: 50px;">
-						<el-button type="danger" @click="openDialog">添加用户</el-button>
+						<el-button type="danger" @click="openDialog" v-if="getBtnRole('user:add')">添加用户</el-button>
 				</el-col>	
 		  </el-row>
 		</el-form>
@@ -33,8 +33,10 @@
 			</template>
 			<!-- 编辑按钮插槽 -->
 			<template v-slot:btnEdit="slotData">
-				<el-button size="mini" type="success" @click="edit(slotData.data.id)">编辑</el-button>
-				<el-button size="mini" type="danger" @click="deleteAllTip([slotData.data.id])">删除</el-button>
+				<el-button size="mini" type="success" @click="edit(slotData.data.id,slotData.data.username)" v-if="getBtnRole('user:edit')">编辑</el-button>
+				<el-button size="mini" type="danger" @click="deleteAllTip([slotData.data.id])" v-if="getBtnRole('user:del')">删除</el-button>
+				<el-button size="mini" type="danger" v-btnPremits="'user:del'">自定指令</el-button>
+				
 			</template>
 		</commonTable>
 		<addUserDialog :flag.sync="dialogFormVisible" :refreshGetUser="getAllUser" ref="dialogUser"/>
@@ -50,6 +52,7 @@
 	import addUserDialog from "./dialog/add_user.vue"
 	import edituserDialog from "./dialog/edit_user.vue"
 	import {globalconfirm} from "../../until/global_V3.0.js"
+	import { getBtnRole } from "@/until/common.js"
 	export default{
 		name:"userList",
 		components:{commonSelect,commonTable,addUserDialog,edituserDialog},
@@ -68,8 +71,6 @@
 				],
 				//给公共表格组件传递数据源
 				tbody:[],
-				//是否显示全选择控件
-				selectState:true,
 				//是否显示全选择控件
 				selectState:true,
 				tableDatatotal:20,//数组总数
@@ -125,9 +126,9 @@
 			/*修改用户弹窗状态*/
 			const dialogFormVisibleEdit = ref(false)
 			//修改用户
-			const edit =((val)=>{
+			const edit =((valid,valname)=>{
 				dialogFormVisibleEdit.value = true
-				refs.dialogEditUser.open(val)
+				refs.dialogEditUser.open(valid,valname)
 			})
 			//修改用户状态
 			const editStat=((val,valid)=>{
@@ -182,7 +183,9 @@
 				//方法
 				edit,editStat,deleteAll,getAllUser,deleteAllTip,search,
 				//数组
-				formUser,tableData
+				formUser,tableData,
+				//权限方法
+				getBtnRole
 			}
 		}
 	}

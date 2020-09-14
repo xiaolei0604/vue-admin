@@ -61,3 +61,21 @@ export function getSystem(data){
 		data
 	})
 }
+
+/*获取用户角色*/
+export function getUserRole(data){
+	return service.request({
+		method:'post',
+		url:'/userRole/',
+		data
+	})
+}
+
+/*获取按钮权限*/
+export function getButtonRole(data){
+	return service.request({
+		method:'post',
+		url:'/permButton/',
+		data
+	})
+}

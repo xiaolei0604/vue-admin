@@ -1,6 +1,7 @@
 import cookie from "cookie_js";
 import {login} from "@/api/login.js";
 import {settoken,setusername,removetoken,removeusername} from "@/until/app.js";
+import store from "../index.js"
 const state= {
 	to_ken:'',
 	username:cookie.get('adminUsername') || ''
@@ -17,7 +18,7 @@ const mutations= {
 	 }
   }
  const  actions= {
-	 
+	
 	  //异步登陆
 	  login(context,data){
 		  return new Promise((resolve,reject)=>{
@@ -35,14 +36,17 @@ const mutations= {
 			  })
 		  })
 	  },
-	  exit(context,data){
+	  exit({commit},data){
 		return new Promise((resolve,reject)=>{
 			removetoken()
 			removeusername()
-			context.commit('SET_TOKEN','')
-			context.commit('SET_USERNAME','')
+			commit('SET_TOKEN','')
+			commit('SET_USERNAME','')
+			store.commit('dynamicRoutes/SET_ROLES','')
+			store.commit('dynamicRoutes/SET_ROUTES','')
 			resolve()
 		})
+		
 		
 	  }
   }

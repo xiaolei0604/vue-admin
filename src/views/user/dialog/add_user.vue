@@ -27,6 +27,19 @@
 			      <el-checkbox v-for="item in form.role1" :key="item.role" :label="item.role" name="type">{{item.name}}</el-checkbox>
 			    </el-checkbox-group>
 			</el-form-item>
+			
+			
+			
+			<el-form-item label="按钮权限" :label-width="formLabelWidth" prop="btnPerm">
+				<template v-for="item in form.btnPerm1">
+					<h4 :key="item.name">{{item.name}}</h4>
+			    <el-checkbox-group v-model="form.btnPerm">
+			      <el-checkbox v-for="item in item.perm" :key="item.value" :label="item.value" name="type">{{item.name}}</el-checkbox>
+			    </el-checkbox-group>
+				
+				</template>
+			</el-form-item>
+			
 			<el-form-item label="是否启用" :label-width="formLabelWidth" prop="status">
 			<el-radio-group v-model="form.status">
 			      <el-radio label="1">禁用</el-radio>
@@ -45,7 +58,7 @@
 <script>
 	import sha1 from "js-sha1";
 	import {reactive,ref,watch,onMounted} from "@vue/composition-api";
-	import {getRole,addUser,getUser,getSystem} from "../../../api/user.js"
+	import {getRole,addUser,getUser,getSystem,getButtonRole} from "../../../api/user.js"
 	import commonCity from "../../../components/commonCity.vue"
 	import {validateEmail,validatePhone} from "@/until/validate";
 	export default{
@@ -68,13 +81,15 @@
 				dialogFormVisible.value=value
 			})
 			const form= reactive({
-			          username: '',
-					  truename:'',
-					  password:'',
-					  phone:'',
+			          username: '437385656@qq.com',
+					  truename:'赵海磊',
+					  password:'xiaoleiai121425',
+					  phone:'15011362671',
 			          region: {},//地区
 					  role: [],//角色
 					  role1:[],//角色赋值
+					  btnPerm:[],//按钮
+					  btnPerm1:[],//按钮赋值
 					  status: '',//启用状态
 			})
 			const provinceValue = ref('')
@@ -97,7 +112,8 @@
 				refs['form'].validate((valid) => {
 				          if (valid) {
 							 if(validateEmail(form.username)){
-								 form.role=JSON.stringify(form.role)
+								 form.role=form.role.join(',')
+								 form.btnPerm=form.btnPerm.join(',')
 								 addUser(form).then(request=>{
 								 	root.$message.success(request.data.message)
 									resetForm()
@@ -144,14 +160,27 @@
 				],
 				status: [
 					{ required: true, message: '请选择用户使用状态', trigger: 'blur' },
+				],
+				btnPerm:[
+					{ required: true, message: '请选择按钮权限', trigger: 'blur' },
 				]
 			})
-				
+			onMounted(()=>{
+				getBtnRole()
+			})	
 			
 			/*获取角色*/
 			const getAllRole = (()=>{
 				getSystem().then(request=>{
 					form.role1=request.data.data
+				}).catch(error=>{
+					console.log(error)
+				})
+			})
+			/*获取按钮权限*/
+			const getBtnRole = (()=>{
+				getButtonRole().then(request=>{
+					form.btnPerm1 =  request.data.data
 				}).catch(error=>{
 					console.log(error)
 				})

@@ -30,13 +30,14 @@
 			  </el-table>
 			  <el-row style="margin-top: 30px;">
 			    <el-col :span="12">
-			  				<el-button v-if="data.selectState" size="small" @click="deleteAll">批量删除</el-button>
+			  				<el-button v-if="data.selectState && getBtnRole('info:batchDel')" size="small" @click="deleteAll">批量删除</el-button>
+							<el-button v-if="data.selectState && getBtnRole('user:batchDel')" size="small" @click="deleteAll">批量删除</el-button>
 							<el-button v-if="data.selectState" size="small" @click="toggleSelection()">取消选择</el-button>
+							
 			  			</el-col>
 			    <el-col :span="12">
 			  				<div class="block" style="text-align: right;">
-			  				    <el-pagination
-			  						
+			  				    <el-pagination			  						
 			  				      @size-change="handleSizeChange"
 			  				      @current-change="handleCurrentChange"
 			  				      :current-page="data.listPageNumber"
@@ -46,7 +47,6 @@
 			  				      :total="data.tableDatatotal">
 			  				    </el-pagination>
 			  				  </div>
-			  				
 			  			</el-col>
 			  </el-row>
 	</div>
@@ -54,7 +54,7 @@
 
 <script>
 	import {reactive,ref,watch,onMounted,onBeforeMount} from "@vue/composition-api";
-	import { toDateChange } from "../until/common.js"
+	import { toDateChange,getBtnRole } from "../until/common.js"
 	export default{
 		name:"commonTable",
 		props:{
@@ -75,7 +75,7 @@
 						listPageSize:"",
 						listPageNumber:""
 			})
-			const formater=ref("toDate12456")
+			const formater=ref("toDate")
 			onBeforeMount(()=>{
 				data.selectState=props.tableDataConfig.selectState
 				data.tableConfig=props.tableDataConfig.thead
@@ -129,7 +129,9 @@
 				//数组
 				data,formater,
 				//方法
-				handleSelectionChange,toggleSelection,deleteAll,handleSizeChange,handleCurrentChange,toDate
+				handleSelectionChange,toggleSelection,deleteAll,handleSizeChange,handleCurrentChange,toDate,
+				//权限方法
+				getBtnRole
 			}
 		}
 	}

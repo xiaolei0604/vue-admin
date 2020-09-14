@@ -1,8 +1,8 @@
 import Vue from "vue";
 import VueRouter from "vue-router";
 Vue.use(VueRouter);
-
-const routes = [
+/*默认路由*/
+export const defaultRoutes = [
   {
     path: "/",
     redirect:"login",
@@ -38,67 +38,73 @@ const routes = [
 		},
 		component: () =>import( "../views/console/index.vue")
 	}]
-  },
-  {
-    path: "/info",
-    name: "info",
-  	meta:{
-  		name:"新闻信息",
-		icon:"info"
-  	},
-    component: () =>import( "../views/layout/index.vue"),
-  	children:[
-		{
-			path: "/infoindex",
-			name: "infoindex",
-			meta:{
-				name:"新闻列表"
-			},
-			component: () =>import( "../views/info/index.vue")
-		},
-		{
-			path: "/infocategory",
-			name: "infocategory",
-			meta:{
-				name:"新闻分类"
-			},
-			component: () =>import( "../views/info/category.vue")
-		},
-		{
-			path: "/infodetail",
-			name: "infodetail",
-			hidden:true,
-			meta:{
-				name:"新闻详情"
-			},
-			component: () =>import( "../views/info/infodetail.vue")
-		}
-		
-	],
-  },
-  {
-    path: "/user",
-    name: "user",
-  	meta:{
-  		name:"用户管理",
-  		icon:"user"
-  	},
-    component: () =>import( "../views/layout/index.vue"),
-  	children:[
-  		{
-  			path: "/userlist",
-  			name: "userlist",
-  			meta:{
-  				name:"用户列表"
-  			},
-  			component: () =>import( "../views/user/index.vue")
-  		}
-  	],
   }
 ];
-
+/*动态路由*/
+export const dynamicRoutes = [
+	{
+	  path: "/info",
+	  name: "info",
+		meta:{
+			system:'infoSystem',
+			name:"新闻信息",
+			icon:"info"
+		},
+	  component: () =>import( "../views/layout/index.vue"),
+		children:[
+			{
+				path: "/infoindex",
+				name: "infoindex",
+				meta:{
+					keepAlive:true,
+					name:"新闻列表"
+				},
+				component: () =>import( "../views/info/index.vue")
+			},
+			{
+				path: "/infocategory",
+				name: "infocategory",
+				meta:{
+					name:"新闻分类"
+				},
+				component: () =>import( "../views/info/category.vue")
+			},
+			{
+				path: "/infodetail",
+				name: "infodetail",
+				hidden:true,
+				meta:{
+					name:"新闻详情"
+				},
+				component: () =>import( "../views/info/infodetail.vue")
+			}
+			
+		],
+	},
+	{
+	  path: "/user",
+	  name: "user",
+		meta:{
+			system:'userSystem',
+			name:"用户管理",
+			icon:"user"
+		},
+	  component: () =>import( "../views/layout/index.vue"),
+		children:[
+			{
+				path: "/userlist",
+				name: "userlist",
+				meta:{
+					keepAlive:true,
+					name:"用户列表"
+				},
+				component: () =>import( "../views/user/index.vue")
+			}
+		],
+	}
+]
 const router = new VueRouter({
-  routes
+  routes:defaultRoutes
 });
 
 export default router;

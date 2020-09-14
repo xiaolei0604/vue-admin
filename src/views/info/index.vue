@@ -50,7 +50,7 @@
 						&nbsp;
 				</el-col>
 				<el-col :span="1" style="float: right;">
-						<el-button type="danger" @click="diafun">添加</el-button>
+						<el-button type="danger" @click="diafun" v-if="getBtnRole('info:add')">添加</el-button>
 				</el-col>	
 		  </el-row>
 		</el-form>
@@ -59,11 +59,13 @@
 				 <img :src="slotData.data.imgUrl" :alt="slotData.data.title" width="50" height="50">
 			</template>
 			<template v-slot:newsBtn="slotData">
-				<el-button size="mini" type="success" @click="diainfoedit(slotData.data.id)">编辑</el-button>
+				<el-button size="mini" type="success" @click="diainfoedit(slotData.data.id)" v-if="getBtnRole('info:edit')">编辑</el-button>
 				 <!-- <router-link :to="{name: 'infodetail',query:{id:scope.row.id}}"> -->
-				 <el-button size="mini" type="warning" @click="infodetailJump(slotData.data)">编辑详情</el-button>
+				 <el-button size="mini" type="warning" @click="infodetailJump(slotData.data)" v-if="getBtnRole('info:detailed')">编辑详情</el-button>
 				<!-- </router-link> -->
-				 <el-button size="mini" type="danger" @click="deleteItem(slotData.data.id)">删除</el-button>
+				 <el-button size="mini" type="danger" @click="deleteItem(slotData.data.id)" v-if="getBtnRole('info:del')">删除</el-button>
+				 
+				 
 			</template>
 		</commonTable>
 		  <Dialoginfolist :flag.sync="dialog_info" :categoryList="options.item" @close="close" @addNewsSon="addNews" ref="dialog"/>
@@ -77,7 +79,7 @@
 	import {reactive,ref,isref,toRefs,onMounted,watch} from "@vue/composition-api";
 	import { globalconfirm } from "../../until/global_V3.0.js"
 	import { getList,add,delNews,editInfo} from "../../api/news.js"
-	import { globalGetCategory,toDateChange } from "../../until/common.js"
+	import { globalGetCategory,toDateChange,getBtnRole } from "../../until/common.js"
 	import commonTable from "../../components/commonTable.vue"
 	export default{
 		name:"infoindex",
@@ -319,6 +321,7 @@
 				infodetailJump,
 				handleSizeChange,
 				handleCurrentChange,
+				getBtnRole
 			}
 		}
 	}

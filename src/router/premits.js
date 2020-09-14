@@ -16,7 +16,30 @@ router.beforeEach((to,from,next)=>{
 			console.log('执行清除缓存')
 			next();
 		}else{
-			next();
+			
+			if(store.getters["dynamicRoutes/roles"].length ===0){
+				store.dispatch("dynamicRoutes/getRole").then(response=>{
+					
+					let role=response.role
+					store.dispatch("dynamicRoutes/createRoute",role).then(response=>{
+						
+						let addroute = store.getters["dynamicRoutes/addRoutes"]
+						let allroute = store.getters["dynamicRoutes/allRoutes"]
+						router.options.routes=allroute
+						router.addRoutes(addroute)
+						next({ ...to, replace: true });
+						
+						})
+					}).catch(error=>{
+						console.log(error)
+					})
+			}else{
+				next();
+			}
+			
+			
+			
+			
 		}
 		
 		

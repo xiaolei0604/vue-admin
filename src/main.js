@@ -15,6 +15,35 @@ Vue.use(ElementUI);
 Vue.config.productionTip = false;
 
 
+Vue.directive("btnPremits",{
+	bind:function(el,bingind,vnode){
+		if(bingind.def.getBtnPremits(bingind.value)){
+			el.style.background='black'
+		}else{
+			el.style.background='red'
+		}
+		
+	},
+	insert:function(el){
+		el.focus()
+		el.setAttribute('placeholder','自定义内容');
+		console.log(el)
+	},
+	getBtnPremits:function(val){
+		let btnRoleAdmin = store.getters["dynamicRoutes/btnRole"].role
+		if(btnRoleAdmin.includes('admin')){
+			return true;
+		}else{
+			let btnRole = store.getters["dynamicRoutes/btnRole"].btnPerm
+			if(btnRole.includes(val)){
+				return true
+			}else{
+				return false
+			}
+		}
+	}
+})
+
 
 new Vue({
   router,

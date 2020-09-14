@@ -1,7 +1,13 @@
 <template>
 	<div class="main-main">
 		
-		<div class="mainxianshi"> <router-view /></div>
+		<div class="mainxianshi"> 
+			
+			<keep-alive :exclude="userlist">
+				<router-view v-if="$route.meta.keepAlive"></router-view>
+			</keep-alive>
+				<router-view v-if="!$route.meta.keepAlive"></router-view>
+		</div>
 		
 		
 	</div>

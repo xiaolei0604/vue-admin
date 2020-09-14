@@ -27,6 +27,15 @@
 			      <el-checkbox v-for="item in form.role1" :key="item.role" :label="item.role" name="type">{{item.name}}</el-checkbox>
 			    </el-checkbox-group>
 			</el-form-item>
+			<el-form-item label="按钮权限" :label-width="formLabelWidth" prop="btnPerm">
+				<template v-for="item in form.btnPerm1">
+					<h4 :key="item.name">{{item.name}}</h4>
+			    <el-checkbox-group v-model="form.btnPerm">
+			      <el-checkbox v-for="item in item.perm" :key="item.value" :label="item.value" name="type">{{item.name}}</el-checkbox>
+			    </el-checkbox-group>
+				
+				</template>
+			</el-form-item>
 			<el-form-item label="是否启用" :label-width="formLabelWidth" prop="status">
 				<el-radio-group v-model="form.status">
 			      <el-radio :label="1">禁用</el-radio>
@@ -45,7 +54,7 @@
 <script>
 	import sha1 from "js-sha1";
 	import {reactive,ref,watch,onMounted} from "@vue/composition-api";
-	import {getRole,editUser,getUser,getSystem} from "../../../api/user.js"
+	import {getRole,editUser,getUser,getSystem,getButtonRole} from "../../../api/user.js"
 	import commonCity from "../../../components/commonCity.vue"
 	import {validateEmail,validatePhone} from "@/until/validate";
 	export default{
@@ -77,6 +86,8 @@
 					  role1:[],//角色赋值
 					  status: '',//启用状态
 					  id:'',
+					  btnPerm:[],
+					  btnPerm1:[],
 					  pageNumber:1,
 					  pageSize:10
 			})
@@ -92,14 +103,16 @@
 			})
 			const oneRequest=ref()
 			/*父组件打开弹窗的时候调取的函数refs.dialogUser.open*/
-			const open=((val)=>{
-				form.id=val
+			const open=((valid,valname)=>{
+				form.id=valid
+				form.username=valname
 				getUser(form).then(resquest=>{
-					let oneRequest=resquest.data.data.data.filter(data=>data.id == val)[0]
-					form.username=oneRequest.username
+					//let oneRequest=resquest.data.data.data.filter(data=>data.id == val)[0]
+					let oneRequest=resquest.data.data.data[0]
 					form.truename=oneRequest.truename
 					form.phone=oneRequest.phone
-					form.role=JSON.parse(oneRequest.role)
+					form.role=oneRequest.role.split(',')
+					form.btnPerm=oneRequest.btnPerm.split(',')
 					form.status=JSON.parse(oneRequest.status)
 					form.region=oneRequest.region
 				}).catch(error=>{
@@ -120,10 +133,11 @@
 				          if (valid) {
 							  
 							 if(validateEmail(form.username)){
-								 form.role=JSON.stringify(form.role)
-								 console.log(form)
+								 form.role=form.role.join(',')
+								 form.btnPerm=form.btnPerm.join(',')
 								editUser(form).then(request=>{
-									form.role=JSON.parse(form.role)
+									form.role=form.role.split(',')
+									form.btnPerm=form.btnPerm.split(',')
 								 	root.$message.success(request.data.message)
 									props.refreshGetUser()
 								 }).catch(error=>{
@@ -168,10 +182,22 @@
 			})
 				
 			
+			onMounted(()=>{
+				getBtnRole()
+			})	
+			
 			/*获取角色*/
 			const getAllRole = (()=>{
 				getSystem().then(request=>{
 					form.role1=request.data.data
+				}).catch(error=>{
+					console.log(error)
+				})
+			})
+			/*获取按钮权限*/
+			const getBtnRole = (()=>{
+				getButtonRole().then(request=>{
+					form.btnPerm1 =  request.data.data
 				}).catch(error=>{
 					console.log(error)
 				})
